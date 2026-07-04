@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "timbot"
+version = "0.1.0"
+description = "Discord export linguistic analysis and texting-style chatbot tooling."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "discord.py>=2.4.0",
+  "matplotlib>=3.9.0",
+  "mlx-lm[train]>=0.31.0",
+  "pandas>=2.2.0",
+  "python-dotenv>=1.0.1",
+  "streamlit>=1.36.0",
+  "vaderSentiment>=3.3.2",
+  "wordcloud>=1.9.3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0"]
+
+[project.scripts]
+timbot = "timbot.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

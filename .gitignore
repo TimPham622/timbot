@@ -216,3 +216,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# macOS
+.DS_Store
+
+# Timbot private data and derived artifacts
+Messages/
+data/
+reports/
+adapters/
+.cache/
+
+# Extra guardrails if files are copied outside the standard folders
+*.jsonl
+*.safetensors
+adapter_config.json
