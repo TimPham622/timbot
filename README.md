@@ -79,6 +79,10 @@ timbot dashboard --train data/train.jsonl --messages data/messages.clean.jsonl
 
 The dashboard reads `data/train.jsonl` for the word cloud. Since MLX `train.jsonl` only stores `{"text": ...}`, it uses `data/messages.clean.jsonl` for timestamp-based charts when that file is available.
 
+Dashboard customizations include date range, hour range, channel filtering, text search, message length filtering, custom stop words, single-word or phrase word clouds, palette/background controls, sentiment timeline grouping, smoothing, channel volume, weekday activity, and filtered sample messages.
+
+The Phrases tab supports custom n-gram ranges, natural phrase counting without stop-word removal, phrase search, top phrase tables, phrase timelines, simple phrase categories, and example messages containing the selected phrase.
+
 ## Quality Notes
 
 For the highest quality, review `reports/report.html` before fine-tuning. If the top phrases, sample messages, or profanity index include junk, adjust the parse filters and regenerate the dataset.
