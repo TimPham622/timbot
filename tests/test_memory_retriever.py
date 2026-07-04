@@ -26,13 +26,13 @@ def test_query_memories_returns_sanitized_documents():
 
 
 def test_build_augmented_prompt_exact_shape():
-    prompt = build_augmented_prompt("hi", ["memory 1", "memory 2"])
+    prompt = build_augmented_prompt("User: hi", ["memory 1", "memory 2"])
     assert prompt == (
         "You are a digital clone of Tim. Here are some real things Tim has said in the past that might relate to the current conversation:\n"
         "- memory 1\n"
         "- memory 2\n\n"
         "User: hi\n"
-        "Tim:"
+        "Tim: "
     )
 
 

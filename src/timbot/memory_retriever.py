@@ -61,15 +61,15 @@ def sanitize_memory(memory: str, max_chars: int = MAX_MEMORY_CHARS) -> str:
     return text[: max_chars - 3].rstrip() + "..."
 
 
-def build_augmented_prompt(incoming_message: str, memories: list[str]) -> str:
+def build_augmented_prompt(conversation_log: str, memories: list[str]) -> str:
     memory_lines = "\n".join(f"- {memory}" for memory in memories)
     if not memory_lines:
         memory_lines = "-"
     return (
         "You are a digital clone of Tim. Here are some real things Tim has said in the past that might relate to the current conversation:\n"
         f"{memory_lines}\n\n"
-        f"User: {incoming_message.strip()}\n"
-        "Tim:"
+        f"{conversation_log.strip()}\n"
+        "Tim: "
     )
 
 
