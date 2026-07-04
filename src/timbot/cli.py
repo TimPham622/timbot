@@ -16,6 +16,12 @@ from .io_utils import read_jsonl, write_jsonl
 from .local_mlx_client import DEFAULT_ADAPTER_PATH, DEFAULT_DATA_DIR, DEFAULT_MLX_MODEL, MlxTrainingConfig, generate_local_text, load_local_model, run_lora_training
 
 
+DEFAULT_MEMORY_COLLECTION = "timbot_memories"
+DEFAULT_MEMORY_DB_PATH = Path("chroma_db")
+DEFAULT_MEMORY_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+DEFAULT_MEMORY_JSONL_PATH = Path("data/messages.clean.jsonl")
+
+
 def main(argv: list[str] | None = None) -> int:
     load_env()
     parser = build_parser()
@@ -83,6 +89,14 @@ def build_parser() -> argparse.ArgumentParser:
     dashboard.add_argument("--messages", type=Path, default=Path("data/messages.clean.jsonl"))
     dashboard.add_argument("--server-port", type=int, default=8501)
     dashboard.set_defaults(func=cmd_dashboard)
+
+    memory = sub.add_parser("build-memory", help="Build a local ChromaDB memory index from cleaned message JSONL.")
+    memory.add_argument("jsonl_path", nargs="?", type=Path, default=DEFAULT_MEMORY_JSONL_PATH)
+    memory.add_argument("--db-path", type=Path, default=DEFAULT_MEMORY_DB_PATH)
+    memory.add_argument("--collection", default=DEFAULT_MEMORY_COLLECTION)
+    memory.add_argument("--embedding-model", default=DEFAULT_MEMORY_EMBEDDING_MODEL)
+    memory.add_argument("--batch-size", type=int, default=200)
+    memory.set_defaults(func=cmd_build_memory)
 
     return parser
 
@@ -190,6 +204,20 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
         str(args.messages),
     ]
     subprocess.run(command, check=True, env=env)
+    return 0
+
+
+def cmd_build_memory(args: argparse.Namespace) -> int:
+    from .memory_builder import build_memory_db
+
+    stats = build_memory_db(
+        jsonl_path=args.jsonl_path,
+        db_path=args.db_path,
+        collection_name=args.collection,
+        embedding_model=args.embedding_model,
+        batch_size=args.batch_size,
+    )
+    print(json.dumps(stats.__dict__, indent=2))
     return 0
 
 

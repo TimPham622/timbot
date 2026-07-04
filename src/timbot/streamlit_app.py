@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import sys
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 os.environ.setdefault("MPLCONFIGDIR", str(Path.cwd() / ".cache" / "matplotlib"))
 
@@ -47,6 +48,19 @@ PHRASE_CATEGORIES = {
     "Emphasis": {"very", "really", "actually", "literally", "so", "too", "af"},
 }
 
+TIMEZONE_OPTIONS = [
+    "Australia/Adelaide",
+    "Australia/Sydney",
+    "Australia/Melbourne",
+    "Australia/Perth",
+    "Australia/Brisbane",
+    "UTC",
+    "America/New_York",
+    "America/Los_Angeles",
+    "Europe/London",
+    "Asia/Tokyo",
+]
+
 
 def main() -> None:
     args = parse_args()
@@ -58,13 +72,14 @@ def main() -> None:
         train_path = Path(st.text_input("MLX train JSONL", str(args.train)))
         messages_path = Path(st.text_input("Timestamped messages JSONL", str(args.messages)))
         max_rows = st.number_input("Max rows to read", min_value=1000, max_value=500000, value=150000, step=5000)
+        timezone_name = st.selectbox("Timezone", TIMEZONE_OPTIONS, index=0)
 
     train_df = load_train_jsonl(train_path, int(max_rows))
     if train_df.empty:
         st.error(f"No text rows found in {train_path}")
         return
 
-    timestamp_df = load_timestamped_messages(messages_path, int(max_rows))
+    timestamp_df = convert_timezone(load_timestamped_messages(messages_path, int(max_rows)), timezone_name)
     controls = render_controls(train_df, timestamp_df)
     filtered_df = filter_timestamped_messages(timestamp_df, controls)
     text_source = select_text_source(train_df, filtered_df, controls)
@@ -80,7 +95,7 @@ def main() -> None:
     metric_cols[0].metric("Training Messages", f"{len(train_df):,}")
     metric_cols[1].metric("Filtered Messages", f"{len(filtered_df):,}" if not timestamp_df.empty else "n/a")
     metric_cols[2].metric("Top Terms", f"{len(top_terms):,}")
-    metric_cols[3].metric("Mean Words / Message", f"{mean_words(text_source):.1f}")
+    metric_cols[3].metric("Timezone", timezone_name)
 
     left, right = st.columns([1.2, 1])
     with left:
@@ -203,6 +218,19 @@ def load_timestamped_messages(path: Path, max_rows: int) -> pd.DataFrame:
     if not frame.empty:
         frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
     return frame
+
+
+def convert_timezone(df: pd.DataFrame, timezone_name: str) -> pd.DataFrame:
+    if df.empty:
+        return df
+    try:
+        ZoneInfo(timezone_name)
+    except ZoneInfoNotFoundError:
+        st.warning(f"Unknown timezone `{timezone_name}`. Falling back to UTC.")
+        timezone_name = "UTC"
+    converted = df.copy()
+    converted["timestamp"] = converted["timestamp"].dt.tz_convert(timezone_name)
+    return converted
 
 
 def render_controls(train_df: pd.DataFrame, timestamp_df: pd.DataFrame) -> dict:

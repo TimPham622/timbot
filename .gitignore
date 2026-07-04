@@ -225,6 +225,7 @@ Messages/
 data/
 reports/
 adapters/
+chroma_db/
 .cache/
 
 # Extra guardrails if files are copied outside the standard folders

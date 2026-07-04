@@ -93,5 +93,7 @@ def clean_generation(output: str) -> str:
     text = SPECIAL_TOKEN_RE.sub("", output)
     if "Reply:" in text:
         text = text.split("Reply:", 1)[-1]
+    if "Tim:" in text:
+        text = text.split("Tim:", 1)[-1]
     lines = text.strip().splitlines()
     return lines[0].strip() if lines else ""
